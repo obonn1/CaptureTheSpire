@@ -1,8 +1,7 @@
 using Godot;
 using HarmonyLib;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
-using MegaCrit.Sts2.Core.Nodes.Screens.Map;
-using System.Reflection;
 
 namespace CaptureTheSpire.CaptureTheSpireCode;
 
@@ -11,7 +10,7 @@ public partial class MainFile : Node
 {
     public const string ModId = "CaptureTheSpire";
 
-    public static Logger Logger { get; } = new(ModId, LogType.Generic);
+    public static MegaCrit.Sts2.Core.Logging.Logger Logger { get; } = new(ModId, LogType.Generic);
 
     public static void Initialize()
     {

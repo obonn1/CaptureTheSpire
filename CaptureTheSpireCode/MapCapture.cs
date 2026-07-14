@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Godot;
+using MegaCrit.Sts2.Core.Nodes.Screens.Map;
+
 
 namespace CaptureTheSpire.CaptureTheSpireCode;
 
@@ -10,7 +8,7 @@ internal class MapCapture
 {
     public static async Task<Image?> CaptureAsync()
     {
-        var viewport = (SubViewport)null;
+        var viewport = (SubViewport?)null;
 
         try
         {
