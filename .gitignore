@@ -1,0 +1,12 @@
+.godot/
+bin/
+/android/
+.idea/
+.vs/
+publish/
+Properties/
+packages/
+.editorconfig
+*.user
+Directory.Build.props
+Roadmap.md

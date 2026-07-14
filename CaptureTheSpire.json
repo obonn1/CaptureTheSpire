@@ -1,0 +1,17 @@
+﻿{
+  "id": "CaptureTheSpire",
+  "name": "CaptureTheSpire",
+  "author": "DonBon",
+  "description": "Slay the Spire 2 mod that helps create easier, better screenshots",
+  "version": "v0.0.0",
+  "min_game_version": "0.107.0",
+  "has_pck": false,
+  "has_dll": true,
+  "dependencies": [
+    {
+      "id": "BaseLib",
+      "min_version": "3.3.5"
+    }
+  ],
+  "affects_gameplay": false
+}
