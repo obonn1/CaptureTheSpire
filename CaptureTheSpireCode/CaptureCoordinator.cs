@@ -54,6 +54,15 @@ internal class CaptureCoordinator
                 return;
             }
 
+            if (WindowsClipboard.TryCopy(image, out var clipboardError))
+            {
+                MainFile.Logger.Info($"Copied full-map capture to clipboard. Godot sees image: {DisplayServer.ClipboardHasImage()}");
+            }
+            else
+            {
+                MainFile.Logger.Error($"Failed to copy to clipboard: {clipboardError}");
+            }
+
             var outputPath = ImageExporter.ExportPng(image, "map_subviewport_full.png");
 
             MainFile.Logger.Info($"Saved full-map capture to {outputPath}.");
