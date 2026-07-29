@@ -8,7 +8,7 @@ namespace CaptureTheSpire.CaptureTheSpireCode;
 internal class CaptureCoordinator
 {
     private static bool isCapturing;
-    private static bool wasF8Pressed;
+    private static bool wasCaptureKeyPressed;
 
     public static void Initialize()
     {
@@ -18,12 +18,18 @@ internal class CaptureCoordinator
 
     private static void CheckHotkey()
     {
-        var isF8Pressed = Input.IsKeyPressed(Key.F8);
+        if (!CaptureSettings.HotkeyEnabled)
+        {
+            wasCaptureKeyPressed = false;
+            return;
+        }
 
-        if (isF8Pressed && !wasF8Pressed)
+        var isCaptureKeyPressed = Input.IsKeyPressed(CaptureSettings.CaptureKey);
+
+        if (isCaptureKeyPressed && !wasCaptureKeyPressed)
             _ = TryCaptureAsync();
 
-        wasF8Pressed = isF8Pressed;
+        wasCaptureKeyPressed = isCaptureKeyPressed;
     }
 
     internal static async Task TryCaptureAsync()

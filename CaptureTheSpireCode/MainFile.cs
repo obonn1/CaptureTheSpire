@@ -2,6 +2,7 @@ using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Modding;
 using CaptureTheSpire.CaptureTheSpireCode.Tools;
+using BaseLib.Config;
 
 namespace CaptureTheSpire.CaptureTheSpireCode;
 
@@ -19,5 +20,7 @@ public partial class MainFile : Node
 
         CaptureCoordinator.Initialize();
         CaptureButton.Initialize();
+        ModConfigRegistry.Register("CaptureTheSpire", new CaptureTheSpireConfig());
+        ModConfigBridge.DeferredRegister();
     }
 }

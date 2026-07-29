@@ -23,9 +23,14 @@ internal static class CaptureButton
     private static void TryInstall()
     {
         if (button is not null && GodotObject.IsInstanceValid(button))
+        {
+            button.Visible = CaptureSettings.ButtonEnabled;
             return;
+        }
 
-        if (failedToLoadTexture)
+        button = null;
+
+        if (!CaptureSettings.ButtonEnabled || failedToLoadTexture)
             return;
 
         var globalUi = FindNode<NGlobalUi>();
@@ -80,6 +85,12 @@ internal static class CaptureButton
         {
             ModLogger.Error($"Capture button failed: {ex}");
         }
+    }
+
+    internal static void SetEnabled(bool enabled)
+    {
+        if (button is not null && GodotObject.IsInstanceValid(button))
+            button.Visible = enabled;
     }
 
     private static T? FindNode<T>() where T : Node
