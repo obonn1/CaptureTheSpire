@@ -1,7 +1,7 @@
-﻿using Godot;
+﻿using CaptureTheSpire.CaptureTheSpireCode.Tools;
+using Godot;
 using MegaCrit.Sts2.Core.Nodes.Screens;
 using MegaCrit.Sts2.Core.Nodes.Screens.Map;
-using CaptureTheSpire.CaptureTheSpireCode.Tools;
 
 namespace CaptureTheSpire.CaptureTheSpireCode;
 
@@ -42,14 +42,18 @@ internal class CaptureCoordinator
 
             if (capture is null)
             {
-                ModLogger.Info("F8 pressed, but no supported screen is available.");
+                ModLogger.Error("Capture did not produce an image.");
                 return;
             }
 
             var (image, captureName, fileName) = capture.Value;
 
             if (WindowsClipboard.TryCopy(image, out var clipboardError))
-                ModLogger.Info($"Copied {captureName} capture to clipboard. Godot sees image: {DisplayServer.ClipboardHasImage()}", logToMain: false);
+            {
+                ModLogger.Info(
+                    $"Copied {captureName} capture to clipboard. Godot sees image: {DisplayServer.ClipboardHasImage()}",
+                    logToMain: false);
+            }
             else
                 ModLogger.Error($"Failed to copy to clipboard: {clipboardError}");
 
@@ -71,7 +75,7 @@ internal class CaptureCoordinator
     {
         if (FindVisibleNode<NDeckViewScreen>() is not null)
         {
-            ModLogger.Info("F8 pressed. Starting full-deck capture.", logToMain: false);
+            ModLogger.Info("Starting full-deck capture.", logToMain: false);
 
             var image = await DeckCapture.CaptureAsync();
 
@@ -80,9 +84,9 @@ internal class CaptureCoordinator
                 : (image, "full-deck", "deck_subviewport_full.png");
         }
 
-        if (NMapScreen.Instance is not null)
+        if (NMapScreen.Instance?.IsVisibleInTree() == true)
         {
-            ModLogger.Info("F8 pressed. Starting full-map capture.", logToMain: false);
+            ModLogger.Info("Starting full-map capture.", logToMain: false);
 
             var image = await MapCapture.CaptureAsync();
 
@@ -91,7 +95,13 @@ internal class CaptureCoordinator
                 : (image, "full-map", "map_subviewport_full.png");
         }
 
-        return null;
+        ModLogger.Info("Starting current-screen capture.", logToMain: false);
+
+        var currentScreenImage = await CurrentScreenCapture.CaptureAsync();
+
+        return currentScreenImage is null
+            ? null
+            : (currentScreenImage, "current-screen", "current_screen.png");
     }
 
     private static T? FindVisibleNode<T>() where T : CanvasItem
