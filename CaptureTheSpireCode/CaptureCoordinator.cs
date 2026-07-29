@@ -26,7 +26,7 @@ internal class CaptureCoordinator
         wasF8Pressed = isF8Pressed;
     }
 
-    private static async Task TryCaptureAsync()
+    internal static async Task TryCaptureAsync()
     {
         if (isCapturing)
         {

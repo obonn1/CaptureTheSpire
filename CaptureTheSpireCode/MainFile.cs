@@ -18,5 +18,6 @@ public partial class MainFile : Node
         harmony.PatchAll();
 
         CaptureCoordinator.Initialize();
+        CaptureButton.Initialize();
     }
 }
