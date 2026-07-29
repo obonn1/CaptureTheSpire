@@ -10,17 +10,17 @@ internal static class SceneTreeLogger
 
         while (current is not null)
         {
-            MainFile.Logger.Info($"Ancestor: {current.Name} [{current.GetType().FullName}]");
+            ModLogger.Info($"Ancestor: {current.Name} [{current.GetType().FullName}]", logToMain: false);
 
             foreach (var child in current.GetChildren())
             {
                 if (child is Control control)
                 {
-                    MainFile.Logger.Info($"  Child: {control.Name} [{control.GetType().FullName}] position={control.Position}, size={control.Size}, visible={control.Visible}");
+                    ModLogger.Info($"  Child: {control.Name} [{control.GetType().FullName}] position={control.Position}, size={control.Size}, visible={control.Visible}", logToMain: false);
                 }
                 else
                 {
-                    MainFile.Logger.Info($"  Child: {child.Name} [{child.GetType().FullName}]");
+                    ModLogger.Info($"  Child: {child.Name} [{child.GetType().FullName}]", logToMain: false);
                 }
             }
 

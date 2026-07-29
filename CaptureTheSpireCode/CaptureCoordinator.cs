@@ -1,8 +1,10 @@
 ﻿using Godot;
+using MegaCrit.Sts2.Core.Nodes.Screens;
 using MegaCrit.Sts2.Core.Nodes.Screens.Map;
+using CaptureTheSpire.CaptureTheSpireCode.Tools;
 
 namespace CaptureTheSpire.CaptureTheSpireCode;
-    
+
 internal class CaptureCoordinator
 {
     private static bool isCapturing;
@@ -28,15 +30,7 @@ internal class CaptureCoordinator
     {
         if (isCapturing)
         {
-            MainFile.Logger.Info("Capture already in progress.");
-            return;
-        }
-
-        var mapScreen = NMapScreen.Instance;
-
-        if (mapScreen is null)
-        {
-            MainFile.Logger.Info("F8 pressed, but the map screen is unavailable.");
+            ModLogger.Info("Capture already in progress.");
             return;
         }
 
@@ -44,36 +38,82 @@ internal class CaptureCoordinator
 
         try
         {
-            MainFile.Logger.Info("F8 pressed. Starting full-map capture.");
+            var capture = await CaptureCurrentScreenAsync();
 
-            var image = await MapCapture.CaptureAsync();
-
-            if (image is null)
+            if (capture is null)
             {
-                MainFile.Logger.Error("Map capture did not produce an image.");
+                ModLogger.Info("F8 pressed, but no supported screen is available.");
                 return;
             }
 
+            var (image, captureName, fileName) = capture.Value;
+
             if (WindowsClipboard.TryCopy(image, out var clipboardError))
-            {
-                MainFile.Logger.Info($"Copied full-map capture to clipboard. Godot sees image: {DisplayServer.ClipboardHasImage()}");
-            }
+                ModLogger.Info($"Copied {captureName} capture to clipboard. Godot sees image: {DisplayServer.ClipboardHasImage()}", logToMain: false);
             else
-            {
-                MainFile.Logger.Error($"Failed to copy to clipboard: {clipboardError}");
-            }
+                ModLogger.Error($"Failed to copy to clipboard: {clipboardError}");
 
-            var outputPath = ImageExporter.ExportPng(image, "map_subviewport_full.png");
+            var outputPath = ImageExporter.ExportPng(image, fileName);
 
-            MainFile.Logger.Info($"Saved full-map capture to {outputPath}.");
+            ModLogger.Info($"Saved {captureName} capture to {outputPath}.", logToMain: false);
         }
         catch (Exception ex)
         {
-            MainFile.Logger.Error($"Capture failed: {ex}");
+            ModLogger.Error($"Capture failed: {ex}");
         }
         finally
         {
             isCapturing = false;
         }
+    }
+
+    private static async Task<(Image Image, string CaptureName, string FileName)?> CaptureCurrentScreenAsync()
+    {
+        if (FindVisibleNode<NDeckViewScreen>() is not null)
+        {
+            ModLogger.Info("F8 pressed. Starting full-deck capture.", logToMain: false);
+
+            var image = await DeckCapture.CaptureAsync();
+
+            return image is null
+                ? null
+                : (image, "full-deck", "deck_subviewport_full.png");
+        }
+
+        if (NMapScreen.Instance is not null)
+        {
+            ModLogger.Info("F8 pressed. Starting full-map capture.", logToMain: false);
+
+            var image = await MapCapture.CaptureAsync();
+
+            return image is null
+                ? null
+                : (image, "full-map", "map_subviewport_full.png");
+        }
+
+        return null;
+    }
+
+    private static T? FindVisibleNode<T>() where T : CanvasItem
+    {
+        var tree = (SceneTree)Engine.GetMainLoop();
+
+        return FindVisibleNode<T>(tree.Root);
+    }
+
+    private static T? FindVisibleNode<T>(Node node) where T : CanvasItem
+    {
+        if (node is T matchingNode && matchingNode.IsVisibleInTree())
+            return matchingNode;
+
+        foreach (var child in node.GetChildren())
+        {
+            var result = FindVisibleNode<T>(child);
+
+            if (result is not null)
+                return result;
+        }
+
+        return null;
     }
 }

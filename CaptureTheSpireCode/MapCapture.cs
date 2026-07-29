@@ -1,5 +1,6 @@
 ﻿using Godot;
 using MegaCrit.Sts2.Core.Nodes.Screens.Map;
+using CaptureTheSpire.CaptureTheSpireCode.Tools;
 
 
 namespace CaptureTheSpire.CaptureTheSpireCode;
@@ -15,48 +16,48 @@ internal class MapCapture
             var mapScreen = NMapScreen.Instance;
             if (mapScreen is null)
             {
-                MainFile.Logger.Error("NMapScreen.Instance was null.");
+                ModLogger.Error("NMapScreen.Instance was null.");
                 return null;
             }
 
             var globalUi = mapScreen.GetParent();
             if (globalUi is null)
             {
-                MainFile.Logger.Error("Could not find GlobalUi.");
+                ModLogger.Error("Could not find GlobalUi.");
                 return null;
             }
 
             var liveTopBar = globalUi.GetNodeOrNull<Control>("TopBar");
             if (liveTopBar is null)
             {
-                MainFile.Logger.Error("Could not find GlobalUi/TopBar.");
+                ModLogger.Error("Could not find GlobalUi/TopBar.");
                 return null;
             }
 
             var liveMap = mapScreen.GetNodeOrNull<Control>("TheMap");
             if (liveMap is null)
             {
-                MainFile.Logger.Error("Could not find TheMap.");
+                ModLogger.Error("Could not find TheMap.");
                 return null;
             }
 
             var liveMapBg =liveMap.GetNodeOrNull<Control>("MapBg");
             if (liveMapBg is null)
             {
-                MainFile.Logger.Error("Could not find TheMap/MapBg.");
+                ModLogger.Error("Could not find TheMap/MapBg.");
                 return null;
             }
 
             if (liveMap.Duplicate() is not Control duplicatedMap)
             {
-                MainFile.Logger.Error("Could not duplicate TheMap.");
+                ModLogger.Error("Could not duplicate TheMap.");
                 return null;
             }
 
 
             if (liveTopBar.Duplicate() is not Control duplicatedTopBar)
             {
-                MainFile.Logger.Error("Could not duplicate TopBar.");
+                ModLogger.Error("Could not duplicate TopBar.");
                 return null;
             }
 
@@ -98,7 +99,7 @@ internal class MapCapture
         }
         catch (Exception ex)
         {
-            MainFile.Logger.Error($"SubViewport capture failed: {ex}");
+            ModLogger.Error($"SubViewport capture failed: {ex}");
 
             return null;
         }
@@ -175,10 +176,10 @@ internal class MapCapture
         Control liveMapBg,
         Vector2I outputSize)
     {
-        MainFile.Logger.Info($"Live TheMap position: {liveMap.Position}, " + $"size: {liveMap.Size}");
+        ModLogger.Info($"Live TheMap position: {liveMap.Position}, " + $"size: {liveMap.Size}", logToMain: false);
 
-        MainFile.Logger.Info($"MapBg position: {liveMapBg.Position}, " + $"size: {liveMapBg.Size}");
+        ModLogger.Info($"MapBg position: {liveMapBg.Position}, " + $"size: {liveMapBg.Size}", logToMain: false);
 
-        MainFile.Logger.Info($"Output size: {outputSize}");
+        ModLogger.Info($"Output size: {outputSize}", logToMain: false);
     }
 }
