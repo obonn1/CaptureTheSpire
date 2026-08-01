@@ -59,6 +59,7 @@
         <None Include="project.godot" />
         <None Include="Roadmap.md" />
         <None Include="CaptureTheSpire/**" />
+		<None Include="README.md" />
     </ItemGroup>
     
     <Target Name="CheckDependencyPaths">
