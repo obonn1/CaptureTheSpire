@@ -1,5 +1,6 @@
 ﻿using CaptureTheSpire.CaptureTheSpireCode.Tools;
 using Godot;
+using MegaCrit.Sts2.Core.Nodes.Cards;
 using MegaCrit.Sts2.Core.Nodes.Screens;
 using MegaCrit.Sts2.Core.Nodes.Screens.Map;
 
@@ -79,11 +80,11 @@ internal class CaptureCoordinator
 
     private static async Task<(Image Image, string CaptureName, string FileName)?> CaptureCurrentScreenAsync()
     {
-        if (FindVisibleNode<NDeckViewScreen>() is not null)
+        if (FindVisibleNode<NCardGrid>() is { } cardGrid)
         {
             ModLogger.Info("Starting full-deck capture.", logToMain: false);
 
-            var image = await DeckCapture.CaptureAsync();
+            var image = await DeckCapture.CaptureAsync(cardGrid);
 
             return image is null
                 ? null

@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Nodes.Cards;
 using MegaCrit.Sts2.Core.Nodes.Cards.Holders;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Nodes.Screens;
+using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
 using System.Collections;
 using System.Reflection;
 
@@ -22,16 +23,18 @@ internal static class DeckCapture
     private const float RelicSectionPadding = 0f;
     private const float RelicSectionHeight = RelicHeight + RelicSectionPadding;
 
-    public static async Task<Image?> CaptureAsync()
+    public static async Task<Image?> CaptureAsync(NCardGrid liveGrid)
     {
         SubViewport? viewport = null;
 
         try
         {
-            var liveDeckScreen = FindVisibleNode<NDeckViewScreen>();
+            var liveDeckScreen = FindDeckScreen(liveGrid);
+
             if (liveDeckScreen is null)
             {
-                ModLogger.Error("Could not find an active NDeckViewScreen.");
+                ModLogger.Error(
+                    $"Could not find a supported screen containing {liveGrid.GetType().Name}.");
                 return null;
             }
 
@@ -42,7 +45,6 @@ internal static class DeckCapture
                 return null;
             }
 
-            var liveGrid = liveDeckScreen.GetNodeOrNull<NCardGrid>("CardGrid");
             if (liveGrid is null)
             {
                 ModLogger.Error("Could not find CardGrid.");
@@ -65,7 +67,7 @@ internal static class DeckCapture
             var outputWidth = Math.Max(1, (int)Math.Ceiling(liveDeckScreen.Size.X));
             var outputHeight = Math.Max(1, (int)Math.Ceiling(finalDeckHeight + BottomPadding));
 
-            if (liveDeckScreen.Duplicate() is not NDeckViewScreen duplicatedDeckScreen)
+            if (liveDeckScreen.Duplicate() is not Control duplicatedDeckScreen)
             {
                 ModLogger.Error("Could not duplicate NDeckViewScreen.");
                 return null;
@@ -77,13 +79,15 @@ internal static class DeckCapture
                 return null;
             }
 
-            var duplicatedGrid = duplicatedDeckScreen.GetNodeOrNull<NCardGrid>("CardGrid");
+            var gridPath = liveDeckScreen.GetPathTo(liveGrid);
+
+            var duplicatedGrid = duplicatedDeckScreen.GetNodeOrNull<NCardGrid>(gridPath);
             if (duplicatedGrid is null)
             {
                 ModLogger.Error("Could not find duplicated CardGrid before preparation.");
                 return null;
             }
-            PrepareDuplicatedDeckScreen(duplicatedDeckScreen, liveDeckScreen.Size, finalDeckHeight);
+            PrepareDuplicatedDeckScreen(duplicatedDeckScreen, duplicatedGrid, liveDeckScreen.Size, finalDeckHeight);
             viewport = CreateViewport(new Vector2I(outputWidth, outputHeight));
 
             var layoutRoot = CreateLayoutRoot(viewport.Size);
@@ -140,7 +144,24 @@ internal static class DeckCapture
         }
     }
 
-    private static void PrepareDuplicatedDeckScreen(NDeckViewScreen duplicatedDeckScreen, Vector2 liveScreenSize, float height)
+    private static Control? FindDeckScreen(NCardGrid grid)
+    {
+        for (Node? current = grid.GetParent();
+             current is not null;
+             current = current.GetParent())
+        {
+            if (current is NDeckViewScreen
+                or NCardPileScreen
+                or NCardGridSelectionScreen)
+            {
+                return (Control)current;
+            }
+        }
+
+        return null;
+    }
+
+    private static void PrepareDuplicatedDeckScreen(Control duplicatedDeckScreen, NCardGrid cardGrid, Vector2 liveScreenSize, float height)
     {
         var screenSize = new Vector2(liveScreenSize.X, height);
 
@@ -149,14 +170,6 @@ internal static class DeckCapture
         duplicatedDeckScreen.Size = screenSize;
         duplicatedDeckScreen.CustomMinimumSize = screenSize;
         duplicatedDeckScreen.MouseFilter = Control.MouseFilterEnum.Ignore;
-
-        var cardGrid = duplicatedDeckScreen.GetNodeOrNull<NCardGrid>("CardGrid");
-
-        if (cardGrid is null)
-        {
-            ModLogger.Error("Could not find CardGrid on duplicated deck screen.");
-            return;
-        }
 
         var gridPosition = new Vector2(0f, cardGrid.Position.Y + RelicSectionHeight);
         var gridSize = new Vector2(liveScreenSize.X, height - gridPosition.Y);
